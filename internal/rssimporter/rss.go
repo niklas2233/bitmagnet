@@ -64,6 +64,7 @@ func extractInfoHash(item rssItem) (string, bool) {
 			return hash, true
 		}
 	}
+
 	return "", false
 }
 
@@ -110,6 +111,7 @@ func extractLeechers(item rssItem) model.NullUint {
 			return model.NewNullUint(uint(leechers))
 		}
 	}
+
 	return model.NullUint{}
 }
 
@@ -128,6 +130,7 @@ func hashFromMagnet(s string) (string, bool) {
 			return strings.TrimPrefix(xt, "urn:btih:"), true
 		}
 	}
+
 	return "", false
 }
 
