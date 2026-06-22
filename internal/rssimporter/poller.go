@@ -200,6 +200,7 @@ func (p *poller) infoHashFromDownload(downloadURL string) (string, bool) {
 		}
 
 		p.logger.Warnw("redirect to non-magnet location", "location", location)
+
 		return "", false
 	}
 
@@ -219,5 +220,6 @@ func (p *poller) infoHashFromDownload(downloadURL string) (string, bool) {
 	h := mi.HashInfoBytes()
 	hashStr := hex.EncodeToString(h[:])
 	p.torrentCache.Store(downloadURL, hashStr)
+
 	return hashStr, true
 }

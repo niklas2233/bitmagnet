@@ -28,6 +28,7 @@ type Result struct {
 
 func New(p Params) Result {
 	var pol *poller
+
 	return Result{
 		Worker: worker.NewWorker("rss_importer", fx.Hook{
 			OnStart: func(_ context.Context) error {

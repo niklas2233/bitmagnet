@@ -101,6 +101,7 @@ func extractLeechers(item rssItem) model.NullUint {
 					seeders = sv
 				}
 			}
+
 			leechers := uint64(0)
 
 			if peers > seeders {
