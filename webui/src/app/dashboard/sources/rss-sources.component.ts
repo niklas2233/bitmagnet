@@ -5,7 +5,7 @@ import {
   OnInit,
   signal,
 } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { AppModule } from "../../app.module";
 import { DocumentTitleComponent } from "../../layout/document-title.component";
@@ -36,10 +36,18 @@ export class RssSourcesComponent implements OnInit {
 
   displayedColumns = ["source", "url", "createdAt", "actions"];
 
+  /* eslint-disable @typescript-eslint/unbound-method */
   form = new FormGroup({
-    url: new FormControl("", [Validators.required, Validators.pattern("https?://.+")]),
-    source: new FormControl("", [Validators.required, Validators.pattern("[a-z0-9_-]+")]),
+    url: new FormControl("", [
+      Validators.required,
+      Validators.pattern("https?://.+"),
+    ]),
+    source: new FormControl("", [
+      Validators.required,
+      Validators.pattern("[a-z0-9_-]+"),
+    ]),
   });
+  /* eslint-enable @typescript-eslint/unbound-method */
 
   ngOnInit() {
     this.loadFeeds();
@@ -53,7 +61,7 @@ export class RssSourcesComponent implements OnInit {
         this.feeds.set(feeds);
         this.loading.set(false);
       },
-      error: (err) => {
+      error: (err: HttpErrorResponse) => {
         this.error.set(err.message ?? "Failed to load feeds");
         this.loading.set(false);
       },
@@ -73,8 +81,9 @@ export class RssSourcesComponent implements OnInit {
           this.form.reset();
           this.adding.set(false);
         },
-        error: (err) => {
-          this.error.set(err.error?.error ?? err.message ?? "Failed to add feed");
+        error: (err: HttpErrorResponse) => {
+          const body = err.error as { error?: string } | null;
+          this.error.set(body?.error ?? err.message ?? "Failed to add feed");
           this.adding.set(false);
         },
       });
@@ -85,10 +94,13 @@ export class RssSourcesComponent implements OnInit {
       .delete(`${apiBase}/api/rss-feeds/${encodeURIComponent(source)}`)
       .subscribe({
         next: () => {
-          this.feeds.update((feeds) => feeds.filter((f) => f.source !== source));
+          this.feeds.update((feeds) =>
+            feeds.filter((f) => f.source !== source),
+          );
         },
-        error: (err) => {
-          this.error.set(err.error?.error ?? err.message ?? "Failed to delete feed");
+        error: (err: HttpErrorResponse) => {
+          const body = err.error as { error?: string } | null;
+          this.error.set(body?.error ?? err.message ?? "Failed to delete feed");
         },
       });
   }

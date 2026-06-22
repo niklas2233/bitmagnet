@@ -321,10 +321,7 @@ const flattenFacets = (
   return {
     facets: activeFacets.length ? activeFacets.join(",") : undefined,
     ...Object.fromEntries(
-      Object.entries(filters).map(([k, values]) => [
-        k,
-        values.join(","),
-      ]),
+      Object.entries(filters).map(([k, values]) => [k, values.join(",")]),
     ),
   };
 };
