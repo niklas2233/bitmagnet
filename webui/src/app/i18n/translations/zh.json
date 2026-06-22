@@ -233,8 +233,23 @@
     "home": "首页",
     "jobs": "任务",
     "queues": "队列",
+    "sources": "__missing__",
     "torrents": "种子",
     "visualize": "可视化"
+  },
+  "sources": {
+    "add": "__missing__",
+    "add_feed": "__missing__",
+    "added": "__missing__",
+    "delete": "__missing__",
+    "feeds": "__missing__",
+    "no_feeds": "__missing__",
+    "source_invalid": "__missing__",
+    "source_name": "__missing__",
+    "source_required": "__missing__",
+    "url": "__missing__",
+    "url_invalid": "__missing__",
+    "url_required": "__missing__"
   },
   "torrents": {
     "classification": "分类",

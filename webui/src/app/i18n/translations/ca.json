@@ -213,8 +213,23 @@
     "home": "Inici",
     "jobs": "Tasques",
     "queues": "Cues",
+    "sources": "__missing__",
     "torrents": "Torrents",
     "visualize": "Visualitza"
+  },
+  "sources": {
+    "add": "__missing__",
+    "add_feed": "__missing__",
+    "added": "__missing__",
+    "delete": "__missing__",
+    "feeds": "__missing__",
+    "no_feeds": "__missing__",
+    "source_invalid": "__missing__",
+    "source_name": "__missing__",
+    "source_required": "__missing__",
+    "url": "__missing__",
+    "url_invalid": "__missing__",
+    "url_required": "__missing__"
   },
   "torrents": {
     "classification": "Classificació",

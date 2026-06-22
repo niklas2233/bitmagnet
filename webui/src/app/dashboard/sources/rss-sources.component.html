@@ -19,10 +19,10 @@
             <mat-form-field appearance="outline" class="field-url">
               <mat-label>{{ t("sources.url") }}</mat-label>
               <input matInput formControlName="url" />
-              @if (form.get('url')?.hasError('required')) {
+              @if (form.get("url")?.hasError("required")) {
                 <mat-error>{{ t("sources.url_required") }}</mat-error>
               }
-              @if (form.get('url')?.hasError('pattern')) {
+              @if (form.get("url")?.hasError("pattern")) {
                 <mat-error>{{ t("sources.url_invalid") }}</mat-error>
               }
             </mat-form-field>
@@ -30,10 +30,10 @@
             <mat-form-field appearance="outline" class="field-source">
               <mat-label>{{ t("sources.source_name") }}</mat-label>
               <input matInput formControlName="source" />
-              @if (form.get('source')?.hasError('required')) {
+              @if (form.get("source")?.hasError("required")) {
                 <mat-error>{{ t("sources.source_required") }}</mat-error>
               }
-              @if (form.get('source')?.hasError('pattern')) {
+              @if (form.get("source")?.hasError("pattern")) {
                 <mat-error>{{ t("sources.source_invalid") }}</mat-error>
               }
             </mat-form-field>
@@ -64,20 +64,28 @@
           } @else {
             <mat-table [dataSource]="feeds()" class="feeds-table">
               <ng-container matColumnDef="source">
-                <mat-header-cell *matHeaderCellDef>{{ t("sources.source_name") }}</mat-header-cell>
+                <mat-header-cell *matHeaderCellDef>{{
+                  t("sources.source_name")
+                }}</mat-header-cell>
                 <mat-cell *matCellDef="let feed">{{ feed.source }}</mat-cell>
               </ng-container>
 
               <ng-container matColumnDef="url">
-                <mat-header-cell *matHeaderCellDef>{{ t("sources.url") }}</mat-header-cell>
+                <mat-header-cell *matHeaderCellDef>{{
+                  t("sources.url")
+                }}</mat-header-cell>
                 <mat-cell *matCellDef="let feed">
                   <span class="url-cell">{{ feed.url }}</span>
                 </mat-cell>
               </ng-container>
 
               <ng-container matColumnDef="createdAt">
-                <mat-header-cell *matHeaderCellDef>{{ t("sources.added") }}</mat-header-cell>
-                <mat-cell *matCellDef="let feed">{{ feed.createdAt | date:'short' }}</mat-cell>
+                <mat-header-cell *matHeaderCellDef>{{
+                  t("sources.added")
+                }}</mat-header-cell>
+                <mat-cell *matCellDef="let feed">{{
+                  feed.createdAt | date: "short"
+                }}</mat-cell>
               </ng-container>
 
               <ng-container matColumnDef="actions">
@@ -95,7 +103,7 @@
               </ng-container>
 
               <mat-header-row *matHeaderRowDef="displayedColumns" />
-              <mat-row *matRowDef="let row; columns: displayedColumns;" />
+              <mat-row *matRowDef="let row; columns: displayedColumns" />
             </mat-table>
           }
         </div>

@@ -29,9 +29,9 @@ The **Sources** page (Dashboard → Sources) lets you add RSS or Torznab feeds t
 
 ### Fields
 
-| Field | Description |
-|---|---|
-| **URL** | Full `http://` or `https://` URL of the feed |
+| Field           | Description                                                                                                                                                                                               |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **URL**         | Full `http://` or `https://` URL of the feed                                                                                                                                                              |
 | **Source name** | A short identifier for the source — lowercase letters, numbers, hyphens and underscores only (e.g. `my_indexer`). This key is what appears in the **Torrent Source** sidebar filter on the Torrents page. |
 
 ### How it works
