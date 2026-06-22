@@ -31,6 +31,7 @@ func (h apiHandler) Apply(e *gin.Engine) error {
 	group.GET("", handler.list)
 	group.POST("", handler.create)
 	group.DELETE("/:source", handler.deleteBySource)
+
 	return nil
 }
 
@@ -51,6 +52,7 @@ func (h *rssFeedsHandler) list(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	result := make([]rssFeedResponse, len(feeds))
 
 	for i, f := range feeds {
@@ -73,10 +75,12 @@ func (h *rssFeedsHandler) create(c *gin.Context) {
 	}
 
 	feed := model.RssFeed{ID: uuid.New().String(), URL: req.URL, Source: req.Source}
+
 	err := h.db.WithContext(c.Request.Context()).Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(&feed).Error; err != nil {
 			return err
 		}
+
 		return tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&model.TorrentSource{
 			Key:  req.Source,
 			Name: req.Source,
@@ -107,6 +111,7 @@ func (h *rssFeedsHandler) deleteBySource(c *gin.Context) {
 		if rowsAffected == 0 {
 			return nil
 		}
+
 		return tx.Where("key = ?", source).Delete(&model.TorrentSource{}).Error
 	})
 	if err != nil {

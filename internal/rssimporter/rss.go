@@ -73,6 +73,7 @@ func extractSize(item rssItem) uint {
 			return uint(v)
 		}
 	}
+
 	if item.Enclosure.Length > 0 {
 		return item.Enclosure.Length
 	}
@@ -115,6 +116,7 @@ func hashFromMagnet(s string) (string, bool) {
 	if !strings.HasPrefix(s, "magnet:") {
 		return "", false
 	}
+
 	u, err := url.Parse(s)
 	if err != nil {
 		return "", false

@@ -114,6 +114,7 @@ func (p *poller) pollFeed(feed FeedConfig) {
 				p.logger.Debugw("no download url", "title", item.Title)
 				continue
 			}
+
 			hashStr, ok = p.infoHashFromDownload(downloadURL)
 			if !ok {
 				p.logger.Warnw("could not extract infohash", "title", item.Title)
@@ -148,10 +149,12 @@ func (p *poller) pollFeed(feed FeedConfig) {
 			p.logger.Warnw("import failed", "title", item.Title, "error", err)
 			continue
 		}
+
 		count++
 	}
 
 	ai.Drain()
+
 	if err := ai.Close(); err != nil {
 		p.logger.Warnw("import close error", "source", source, "error", err)
 	} else {
@@ -195,6 +198,7 @@ func (p *poller) infoHashFromDownload(downloadURL string) (string, bool) {
 			p.torrentCache.Store(downloadURL, hash)
 			return hash, true
 		}
+
 		p.logger.Warnw("redirect to non-magnet location", "location", location)
 		return "", false
 	}
