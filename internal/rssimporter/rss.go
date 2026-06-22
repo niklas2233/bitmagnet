@@ -42,6 +42,7 @@ func (item rssItem) torznabAttr(name string) string {
 			return a.Value
 		}
 	}
+
 	return ""
 }
 
@@ -50,6 +51,7 @@ func parseRSSFeed(data []byte) ([]rssItem, error) {
 	if err := xml.Unmarshal(data, &feed); err != nil {
 		return nil, err
 	}
+
 	return feed.Channel.Items, nil
 }
 
@@ -78,6 +80,7 @@ func extractSize(item rssItem) uint {
 	if item.Enclosure.Length > 0 {
 		return item.Enclosure.Length
 	}
+
 	return 0
 }
 
@@ -87,6 +90,7 @@ func extractSeeders(item rssItem) model.NullUint {
 			return model.NewNullUint(uint(v))
 		}
 	}
+
 	return model.NullUint{}
 }
 
@@ -108,6 +112,7 @@ func extractLeechers(item rssItem) model.NullUint {
 			if peers > seeders {
 				leechers = peers - seeders
 			}
+
 			return model.NewNullUint(uint(leechers))
 		}
 	}
@@ -146,5 +151,6 @@ func parsePubDate(s string) time.Time {
 			return t
 		}
 	}
+
 	return time.Time{}
 }
