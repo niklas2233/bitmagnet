@@ -11,6 +11,7 @@ import (
 // crawler fetches their metainfo from the DHT network even without normal discovery.
 func (c *crawler) runSeedInfoHashes(ctx context.Context) {
 	const maxNodes = 8 // try up to this many closest DHT nodes per hash
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -19,14 +20,17 @@ func (c *crawler) runSeedInfoHashes(ctx context.Context) {
 			if !ok {
 				return
 			}
+
 			nodes := c.kTable.GetClosestNodes(hash)
 			if len(nodes) == 0 {
 				continue // ktable not ready yet; the metafetcher will retry on next poll
 			}
+
 			limit := maxNodes
 			if len(nodes) < limit {
 				limit = len(nodes)
 			}
+
 			for _, node := range nodes[:limit] {
 				req := nodeHasPeersForHash{
 					infoHash: hash,

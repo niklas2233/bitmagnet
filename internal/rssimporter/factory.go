@@ -46,7 +46,7 @@ func New(p Params) Result {
 					logger:   p.Logger.Named("rss_importer"),
 					stop:     make(chan struct{}),
 				}
-				go pol.start()
+				go pol.start() //nolint:contextcheck
 				return nil
 			},
 			OnStop: func(_ context.Context) error {

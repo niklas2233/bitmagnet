@@ -23,15 +23,17 @@ type torznabAttr struct {
 	Value string `xml:"value,attr"`
 }
 
+type rssEnclosure struct {
+	URL    string `xml:"url,attr"`
+	Length uint   `xml:"length,attr"`
+}
+
 type rssItem struct {
 	Title        string        `xml:"title"`
 	Link         string        `xml:"link"`
 	PubDate      string        `xml:"pubDate"`
 	TorznabAttrs []torznabAttr `xml:"http://torznab.com/schemas/2015/feed attr"`
-	Enclosure    struct {
-		URL    string `xml:"url,attr"`
-		Length uint   `xml:"length,attr"`
-	} `xml:"enclosure"`
+	Enclosure    rssEnclosure  `xml:"enclosure"`
 }
 
 func (item rssItem) torznabAttr(name string) string {
@@ -98,6 +100,7 @@ func extractLeechers(item rssItem) model.NullUint {
 				}
 			}
 			leechers := uint64(0)
+
 			if peers > seeders {
 				leechers = peers - seeders
 			}

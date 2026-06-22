@@ -43,8 +43,10 @@ func (f *fetcher) start() {
 
 func (f *fetcher) run(ctx context.Context) {
 	f.processBatch(ctx)
+
 	ticker := time.NewTicker(f.config.Interval)
 	defer ticker.Stop()
+
 	for {
 		select {
 		case <-f.stop:
@@ -78,18 +80,24 @@ func (f *fetcher) processBatch(ctx context.Context) {
 	f.logger.Infow("starting targeted DHT fetch", "count", len(rows))
 
 	sem := semaphore.NewWeighted(int64(f.config.Concurrency))
+
 	var wg sync.WaitGroup
+
 	resolved := 0
+
 	var mu sync.Mutex
 
 	for _, r := range rows {
 		if err := sem.Acquire(ctx, 1); err != nil {
 			return
 		}
+
 		wg.Add(1)
-		go func(hash protocol.ID) {
+
+		go func(hash protocol.ID) { //nolint:contextcheck
 			defer sem.Release(1)
 			defer wg.Done()
+
 			if err := f.processHash(ctx, hash); err == nil {
 				mu.Lock()
 				resolved++
@@ -99,6 +107,7 @@ func (f *fetcher) processBatch(ctx context.Context) {
 	}
 
 	wg.Wait()
+
 	f.logger.Infow("targeted DHT fetch complete", "found", len(rows), "resolved", resolved)
 }
 
@@ -119,7 +128,9 @@ func (f *fetcher) processHash(ctx context.Context, hash protocol.ID) error {
 // iterativeGetPeers performs a Kademlia-style iterative get_peers lookup.
 // It starts with the closest nodes from the shared routing table and follows
 // closer nodes hop by hop until peers are found or hops are exhausted.
-func (f *fetcher) iterativeGetPeers(ctx context.Context, hash protocol.ID) ([]netip.AddrPort, error) {
+func (f *fetcher) iterativeGetPeers(
+	ctx context.Context, hash protocol.ID,
+) ([]netip.AddrPort, error) {
 	if len(f.kTable.GetClosestNodes(hash)) == 0 {
 		return nil, errors.New("routing table empty")
 	}
@@ -136,7 +147,7 @@ func (f *fetcher) iterativeGetPeers(ctx context.Context, hash protocol.ID) ([]ne
 		}
 	}
 
-	for hop := 0; hop < f.config.GetPeersHops; hop++ {
+	for range f.config.GetPeersHops {
 		if len(frontier) == 0 {
 			break
 		}
@@ -145,29 +156,40 @@ func (f *fetcher) iterativeGetPeers(ctx context.Context, hash protocol.ID) ([]ne
 		if len(frontier) < size {
 			size = len(frontier)
 		}
+
 		batch := frontier[:size]
 		frontier = frontier[size:]
 
 		var mu sync.Mutex
+
 		var foundPeers []netip.AddrPort
+
 		var newCandidates []nodeCandidate
 
 		var wg sync.WaitGroup
+
 		for _, c := range batch {
 			wg.Add(1)
+
 			go func(addr netip.AddrPort) {
 				defer wg.Done()
+
 				hopCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 				defer cancel()
+
 				res, err := f.client.GetPeers(hopCtx, addr, hash)
 				if err != nil {
 					return
 				}
+
 				mu.Lock()
 				defer mu.Unlock()
+
 				foundPeers = append(foundPeers, res.Values...)
+
 				for _, n := range res.Nodes {
 					key := n.Addr.String()
+
 					if !seen[key] {
 						seen[key] = true
 						newCandidates = append(newCandidates, nodeCandidate{addr: n.Addr, id: n.ID})
@@ -175,6 +197,7 @@ func (f *fetcher) iterativeGetPeers(ctx context.Context, hash protocol.ID) ([]ne
 				}
 			}(c.addr)
 		}
+
 		wg.Wait()
 
 		if len(foundPeers) > 0 {
@@ -185,6 +208,7 @@ func (f *fetcher) iterativeGetPeers(ctx context.Context, hash protocol.ID) ([]ne
 		sort.Slice(newCandidates, func(i, j int) bool {
 			return xorLess(newCandidates[i].id, newCandidates[j].id, hash)
 		})
+
 		frontier = append(newCandidates, frontier...)
 	}
 
@@ -208,38 +232,53 @@ func xorLess(a, b, target protocol.ID) bool {
 	return false
 }
 
-func (f *fetcher) fetchMetaInfo(ctx context.Context, hash protocol.ID, peers []netip.AddrPort) (metainfo.Info, error) {
+func (f *fetcher) fetchMetaInfo(
+	ctx context.Context, hash protocol.ID, peers []netip.AddrPort,
+) (metainfo.Info, error) {
 	var errs []error
+
 	for _, p := range peers {
 		res, err := f.requester.Request(ctx, hash, p)
 		if err != nil {
 			errs = append(errs, err)
+
 			continue
 		}
+
 		if banErr := f.banningChecker.Check(res.Info); banErr != nil {
 			_ = f.blockingManager.Block(ctx, []protocol.ID{hash}, false)
+
 			return metainfo.Info{}, banErr
 		}
+
 		return res.Info, nil
 	}
+
 	return metainfo.Info{}, errors.Join(errs...)
 }
 
 func (f *fetcher) persist(ctx context.Context, hash protocol.ID, info metainfo.Info) error {
 	name := info.BestName()
+
 	filesStatus := model.FilesStatusSingle
+
 	var filesCount model.NullUint
+
 	var files []model.TorrentFile
 
 	const saveFilesThreshold = 100
+
 	if len(info.Files) > 0 {
 		filesStatus = model.FilesStatusMulti
 		filesCount = model.NewNullUint(uint(len(info.Files)))
+
 		for i, file := range info.Files {
 			if i >= saveFilesThreshold {
 				filesStatus = model.FilesStatusOverThreshold
+
 				break
 			}
+
 			files = append(files, model.TorrentFile{
 				InfoHash: hash,
 				Index:    uint(i),

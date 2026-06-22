@@ -34,6 +34,7 @@ type Result struct {
 
 func New(p Params) Result {
 	stop := make(chan struct{})
+
 	return Result{
 		Worker: worker.NewWorker("hash_fetcher", fx.Hook{
 			OnStart: func(_ context.Context) error {
@@ -60,7 +61,7 @@ func New(p Params) Result {
 					logger:          p.Logger.Named("hash_fetcher"),
 					stop:            stop,
 				}
-				go f.start()
+				go f.start() //nolint:contextcheck
 				return nil
 			},
 			OnStop: func(_ context.Context) error {

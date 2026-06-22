@@ -58,8 +58,8 @@ func (h *rssFeedsHandler) list(c *gin.Context) {
 }
 
 type createFeedRequest struct {
-	URL    string `json:"url" binding:"required"`
-	Source string `json:"source" binding:"required"`
+	URL    string `binding:"required" json:"url"`
+	Source string `binding:"required" json:"source"`
 }
 
 func (h *rssFeedsHandler) create(c *gin.Context) {
@@ -82,7 +82,9 @@ func (h *rssFeedsHandler) create(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusCreated, rssFeedResponse{ID: feed.ID, URL: feed.URL, Source: feed.Source, CreatedAt: feed.CreatedAt})
+	c.JSON(http.StatusCreated, rssFeedResponse{
+		ID: feed.ID, URL: feed.URL, Source: feed.Source, CreatedAt: feed.CreatedAt,
+	})
 }
 
 func (h *rssFeedsHandler) deleteBySource(c *gin.Context) {

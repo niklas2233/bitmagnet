@@ -32,7 +32,7 @@ func New(p Params) Result {
 	return Result{
 		Worker: worker.NewWorker("metafetcher", fx.Hook{
 			OnStart: func(_ context.Context) error {
-				go run(p, stop)
+				go run(p, stop) //nolint:contextcheck
 				return nil
 			},
 			OnStop: func(_ context.Context) error {
@@ -45,9 +45,12 @@ func New(p Params) Result {
 
 func run(p Params, stop chan struct{}) {
 	logger := p.Logger.Named("metafetcher")
+
 	fetch(p, logger)
+
 	ticker := time.NewTicker(p.Config.Interval)
 	defer ticker.Stop()
+
 	for {
 		select {
 		case <-stop:
@@ -81,6 +84,7 @@ func fetch(p Params, logger *zap.SugaredLogger) {
 	}
 
 	seeded := 0
+
 	for _, r := range rows {
 		if p.InfoHashSeed.Seed(r.InfoHash) {
 			seeded++

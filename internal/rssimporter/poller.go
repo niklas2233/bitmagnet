@@ -50,10 +50,11 @@ func (p *poller) poll() {
 }
 
 func (p *poller) allFeeds() []FeedConfig {
-	feeds := make([]FeedConfig, len(p.config.Feeds))
-	copy(feeds, p.config.Feeds)
+	feeds := append([]FeedConfig{}, p.config.Feeds...)
+
 	if p.db != nil {
 		var dbFeeds []model.RssFeed
+
 		if err := p.db.Find(&dbFeeds).Error; err != nil {
 			p.logger.Warnw("failed to load rss feeds from db", "error", err)
 		} else {
@@ -62,6 +63,7 @@ func (p *poller) allFeeds() []FeedConfig {
 			}
 		}
 	}
+
 	return feeds
 }
 
@@ -96,6 +98,7 @@ func (p *poller) pollFeed(feed FeedConfig) {
 	p.logger.Debugw("fetched rss items", "source", source, "count", len(items))
 
 	count := 0
+
 	for _, item := range items {
 		hashStr, ok := extractInfoHash(item)
 		if !ok {
