@@ -40,6 +40,16 @@
               ><mat-icon svgIcon="magnet" />{{ t("routes.torrents") }}</a
             >
           </li>
+          <li>
+            <a
+              mat-button
+              routerLink="sources"
+              routerLinkActive
+              #linkSources="routerLinkActive"
+              [class]="linkSources.isActive ? 'active' : ''"
+              ><mat-icon>rss_feed</mat-icon>{{ t("routes.sources") }}</a
+            >
+          </li>
         </ul>
       </nav>
     </mat-drawer>

@@ -1,0 +1,1 @@
+var o=window.location.protocol+"//"+window.location.hostname+":"+window.location.port+"/graphql",n=window.location.protocol+"//"+window.location.hostname+":"+window.location.port;export{o as a,n as b};

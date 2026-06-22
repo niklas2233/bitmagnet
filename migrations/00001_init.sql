@@ -12,8 +12,7 @@ create table torrent_sources
 );
 
 insert into torrent_sources (key, name, created_at, updated_at)
-values ('dht', 'DHT', now(), now()),
-       ('rarbg', 'RARBG', now(), now());
+values ('dht', 'DHT', now(), now());
 
 create table torrents
 (

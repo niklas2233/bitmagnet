@@ -1,0 +1,105 @@
+<ng-container *transloco="let t">
+  <app-document-title [parts]="[t('routes.sources'), t('routes.dashboard')]" />
+
+  <mat-card class="dashboard-card">
+    <mat-card-header>
+      <mat-toolbar>
+        <h2><mat-icon>rss_feed</mat-icon>{{ t("routes.sources") }}</h2>
+      </mat-toolbar>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="sources-body">
+        @if (error()) {
+          <div class="error-banner">{{ error() }}</div>
+        }
+
+        <div class="add-section">
+          <h3 class="section-title">{{ t("sources.add_feed") }}</h3>
+          <form [formGroup]="form" (ngSubmit)="addFeed()" class="add-form">
+            <mat-form-field appearance="outline" class="field-url">
+              <mat-label>{{ t("sources.url") }}</mat-label>
+              <input matInput formControlName="url" />
+              @if (form.get('url')?.hasError('required')) {
+                <mat-error>{{ t("sources.url_required") }}</mat-error>
+              }
+              @if (form.get('url')?.hasError('pattern')) {
+                <mat-error>{{ t("sources.url_invalid") }}</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field-source">
+              <mat-label>{{ t("sources.source_name") }}</mat-label>
+              <input matInput formControlName="source" />
+              @if (form.get('source')?.hasError('required')) {
+                <mat-error>{{ t("sources.source_required") }}</mat-error>
+              }
+              @if (form.get('source')?.hasError('pattern')) {
+                <mat-error>{{ t("sources.source_invalid") }}</mat-error>
+              }
+            </mat-form-field>
+
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              [disabled]="form.invalid || adding()"
+            >
+              @if (adding()) {
+                <mat-progress-spinner diameter="20" mode="indeterminate" />
+              } @else {
+                {{ t("sources.add") }}
+              }
+            </button>
+          </form>
+        </div>
+
+        <mat-divider />
+
+        <div class="table-section">
+          <h3 class="section-title">{{ t("sources.feeds") }}</h3>
+          @if (loading()) {
+            <mat-progress-bar mode="indeterminate" />
+          } @else if (feeds().length === 0) {
+            <p class="empty-msg">{{ t("sources.no_feeds") }}</p>
+          } @else {
+            <mat-table [dataSource]="feeds()" class="feeds-table">
+              <ng-container matColumnDef="source">
+                <mat-header-cell *matHeaderCellDef>{{ t("sources.source_name") }}</mat-header-cell>
+                <mat-cell *matCellDef="let feed">{{ feed.source }}</mat-cell>
+              </ng-container>
+
+              <ng-container matColumnDef="url">
+                <mat-header-cell *matHeaderCellDef>{{ t("sources.url") }}</mat-header-cell>
+                <mat-cell *matCellDef="let feed">
+                  <span class="url-cell">{{ feed.url }}</span>
+                </mat-cell>
+              </ng-container>
+
+              <ng-container matColumnDef="createdAt">
+                <mat-header-cell *matHeaderCellDef>{{ t("sources.added") }}</mat-header-cell>
+                <mat-cell *matCellDef="let feed">{{ feed.createdAt | date:'short' }}</mat-cell>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <mat-header-cell *matHeaderCellDef></mat-header-cell>
+                <mat-cell *matCellDef="let feed">
+                  <button
+                    mat-icon-button
+                    color="warn"
+                    (click)="deleteFeed(feed.source)"
+                    [matTooltip]="t('sources.delete')"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </mat-cell>
+              </ng-container>
+
+              <mat-header-row *matHeaderRowDef="displayedColumns" />
+              <mat-row *matRowDef="let row; columns: displayedColumns;" />
+            </mat-table>
+          }
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</ng-container>

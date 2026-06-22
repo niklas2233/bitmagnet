@@ -14,6 +14,7 @@ func TorrentSourceFacet(options ...query.FacetOption) query.Facet {
 				query.FacetHasKey(TorrentSourceFacetKey),
 				query.FacetHasLabel("Torrent Source"),
 				query.FacetUsesOrLogic(),
+				query.FacetShowEmpty(),
 			}, options...)...,
 		),
 	}

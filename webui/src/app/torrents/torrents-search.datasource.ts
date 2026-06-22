@@ -98,7 +98,7 @@ export class TorrentsSearchDatasource
         this.loadResult({
           input: {
             ...variables.input,
-            cached: true,
+            cached: false,
           },
         });
       },

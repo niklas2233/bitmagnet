@@ -24,6 +24,8 @@ type Item struct {
 	Name            string
 	Size            uint
 	Private         bool
+	Seeders         model.NullUint
+	Leechers        model.NullUint
 	ContentType     model.NullContentType
 	ContentSource   model.NullString
 	ContentID       model.NullString
@@ -41,7 +43,8 @@ type Item struct {
 }
 
 type Info struct {
-	ID string
+	ID       string
+	Priority int
 }
 
 type importer struct {
@@ -212,7 +215,7 @@ func (i *activeImport) persistItems(items ...Item) error {
 
 	job, jobErr := processor.NewQueueJob(processor.MessageParams{
 		InfoHashes: infoHashes,
-	}, model.QueueJobPriority(20))
+	}, model.QueueJobPriority(i.info.Priority))
 	if jobErr != nil {
 		return jobErr
 	}
@@ -250,7 +253,9 @@ func (i *activeImport) persistItems(items ...Item) error {
 			return createTorrentsTorrentSourcesErr
 		}
 
-		return tx.QueueJob.Create(&job)
+		return tx.QueueJob.Clauses(clause.OnConflict{
+			DoNothing: true,
+		}).Create(&job)
 	})
 }
 
@@ -266,6 +271,8 @@ func createTorrentModel(info Info, item Item) model.Torrent {
 				InfoHash: item.InfoHash,
 				Source:   item.Source,
 				ImportID: model.NewNullString(info.ID),
+				Seeders:  item.Seeders,
+				Leechers: item.Leechers,
 				PublishedAt: sql.NullTime{
 					Time:  item.PublishedAt,
 					Valid: !item.PublishedAt.IsZero(),

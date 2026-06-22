@@ -44,6 +44,7 @@ func (c *crawler) runPersistTorrents(ctx context.Context) {
 					},
 						// delay the classifier by a minute to allow time for the S/L scrape:
 						model.QueueJobDelayBy(time.Minute),
+						model.QueueJobPriority(10),
 					)
 					if err != nil {
 						c.logger.Errorf("error creating queue job: %s", err.Error())

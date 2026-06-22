@@ -42,10 +42,15 @@ type Result struct {
 	DhtCrawlerActive *concurrency.AtomicValue[bool] `name:"dht_crawler_active"`
 
 	PersistedTotal prometheus.Collector `group:"prometheus_collectors"`
+
+	InfoHashSeed SeedInfoHash `name:"dht_infohash_seed"`
 }
 
 func New(params Params) Result {
 	active := &concurrency.AtomicValue[bool]{}
+
+	// Created at wire time so external components can inject and use it immediately.
+	seed := make(infoHashSeedChan, 1000)
 
 	var c crawler
 
@@ -76,6 +81,7 @@ func New(params Params) Result {
 						return err
 					}
 					c = crawler{
+						infoHashSeed:                 seed,
 						kTable:                       params.KTable,
 						client:                       cl,
 						metainfoRequester:            params.MetainfoRequester,
@@ -144,5 +150,6 @@ func New(params Params) Result {
 		),
 		PersistedTotal:   persistedTotal,
 		DhtCrawlerActive: active,
+		InfoHashSeed:     seed,
 	}
 }

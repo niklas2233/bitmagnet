@@ -22,7 +22,7 @@ func TestParseDate(t *testing.T) {
 		{"XXX Video (2022-09-21) 1080p.mp4", model.Date{Year: 2022, Month: 9, Day: 21}},
 		{"Exxtra.23.02.01.Bla.Bla.Bla.XXX.1080p.HEVC.x265.PRT[XvX]", model.Date{Year: 2023, Month: 2, Day: 1}},
 		{"The Movie (13.10.2017)_1080p.mp4", model.Date{Year: 2017, Month: 10, Day: 13}},
-		{"Movie.23.05.15..The.Best.Of.XXX.1080p.MP4-WRB[rarbg]", model.Date{Year: 2023, Month: 5, Day: 15}},
+		{"Movie.23.05.15..The.Best.Of.XXX.1080p.MP4-WRB[XvX]", model.Date{Year: 2023, Month: 5, Day: 15}},
 		{
 			"2021.09.11_Serie_C_2021.22_R.03_Xxx_FC_vs_Xxx_FC_[football.net]_720p.50_RUS.mkv",
 			model.Date{Year: 2021, Month: 9, Day: 11},

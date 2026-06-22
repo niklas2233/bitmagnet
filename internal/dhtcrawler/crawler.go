@@ -40,6 +40,7 @@ type crawler struct {
 	requestMetaInfo              concurrency.BufferedConcurrentChannel[infoHashWithPeers]
 	persistTorrents              concurrency.BatchingChannel[infoHashWithMetaInfo]
 	persistSources               concurrency.BatchingChannel[infoHashWithScrape]
+	infoHashSeed                 chan protocol.ID
 	rescrapeThreshold            time.Duration
 	saveFilesThreshold           uint
 	savePieces                   bool
@@ -76,6 +77,7 @@ func (c *crawler) start() {
 	go c.reseedBootstrapNodes(ctx)
 	go c.runPersistTorrents(ctx)
 	go c.runPersistSources(ctx)
+	go c.runSeedInfoHashes(ctx)
 	go c.getOldNodes(ctx)
 	<-c.stopped
 }

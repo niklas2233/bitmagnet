@@ -207,7 +207,7 @@ func (h *serverHandler) handleJob(
 			)...,
 		).Order(
 			h.query.QueueJob.Status.Eq(string(model.QueueJobStatusRetry)),
-			h.query.QueueJob.Priority,
+			h.query.QueueJob.Priority.Desc(),
 			h.query.QueueJob.RunAfter,
 		).Clauses(clause.Locking{
 			Strength: "UPDATE",

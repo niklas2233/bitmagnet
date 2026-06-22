@@ -31,7 +31,7 @@ This means that **bitmagnet** is not reliant on any external trackers or torrent
 - [x] A DHT crawler and protocol implementation
 - [x] A generic BitTorrent indexer: **bitmagnet** can index torrents from any source, not only the DHT network - currently this is only possible via [the `/import` endpoint](/guides/import.html); more user-friendly methods are in the pipeline, see high-priority features below
 - [x] A highly customizable <a href="/guides/classifier.html">content classifier</a> that can currently identify many types of content, along with key related attributes such as language, resolution, source (BluRay, webrip etc.) and enriches this with data from sources including [The Movie Database](https://www.themoviedb.org/)
-- [x] [An import facility for ingesting torrents from any source, for example the RARBG backup](/guides/import.html)
+- [x] [An import facility for ingesting torrents from any source](/guides/import.html)
 - [x] A torrent search engine
 - [x] A GraphQL API: currently this provides a single search query; there is also an embedded GraphQL playground at `/graphql`
 - [x] A responsive, multilingual web user interface implemented in Angular

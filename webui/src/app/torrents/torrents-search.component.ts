@@ -250,7 +250,7 @@ const controlsToParams = (ctrl: TorrentSearchControls): Params => {
     desc = orderBy.descending ? "1" : "0";
   }
   return {
-    query: ctrl.queryString ? encodeURIComponent(ctrl.queryString) : undefined,
+    query: ctrl.queryString || undefined,
     page,
     limit,
     content_type: ctrl.contentType,
@@ -323,7 +323,7 @@ const flattenFacets = (
     ...Object.fromEntries(
       Object.entries(filters).map(([k, values]) => [
         k,
-        encodeURIComponent(values.join(",")),
+        values.join(","),
       ]),
     ),
   };

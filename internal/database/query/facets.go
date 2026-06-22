@@ -18,6 +18,7 @@ type FacetConfig interface {
 	Logic() model.FacetLogic
 	Filter() FacetFilter
 	IsAggregated() bool
+	ShowEmpty() bool
 	AggregationOption(b OptionBuilder) (OptionBuilder, error)
 	TriggersCte() bool
 }
@@ -53,6 +54,7 @@ type facetConfig struct {
 	logic              model.FacetLogic
 	filter             FacetFilter
 	aggregate          bool
+	showEmpty          bool
 	aggregationOptions []Option
 	triggersCte        bool
 }
@@ -163,6 +165,13 @@ func FacetIsAggregated() FacetOption {
 	}
 }
 
+func FacetShowEmpty() FacetOption {
+	return func(c facetConfig) facetConfig {
+		c.showEmpty = true
+		return c
+	}
+}
+
 func FacetHasFilter(filter FacetFilter) FacetOption {
 	return func(c facetConfig) facetConfig {
 		c.filter = filter
@@ -198,6 +207,10 @@ func (c facetConfig) Logic() model.FacetLogic {
 
 func (c facetConfig) IsAggregated() bool {
 	return c.aggregate
+}
+
+func (c facetConfig) ShowEmpty() bool {
+	return c.showEmpty
 }
 
 func (c facetConfig) AggregationOption(b OptionBuilder) (OptionBuilder, error) {
@@ -318,7 +331,7 @@ func (b optionBuilder) calculateAggregations(ctx context.Context) (Aggregations,
 						addErr(fmt.Errorf("failed to get count for key '%s': %w", facet.Key(), countErr))
 						return
 					}
-					if countResult.Count > 0 || countResult.BudgetExceeded || filter.HasKey(key) {
+					if countResult.Count > 0 || countResult.BudgetExceeded || filter.HasKey(key) || facet.ShowEmpty() {
 						addItem(key, AggregationItem{
 							Label:      label,
 							Count:      uint(countResult.Count),

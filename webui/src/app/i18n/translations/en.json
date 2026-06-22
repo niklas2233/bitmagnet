@@ -138,8 +138,11 @@
     "worker": "Worker",
     "workers": {
       "dht_crawler": "DHT crawler",
+      "hash_fetcher": "Hash fetcher",
       "http_server": "HTTP server",
-      "queue_server": "Queue server"
+      "metafetcher": "Meta fetcher",
+      "queue_server": "Queue server",
+      "rss_importer": "RSS importer"
     }
   },
   "languages": {
@@ -230,8 +233,23 @@
     "home": "Home",
     "jobs": "Jobs",
     "queues": "Queues",
+    "sources": "Sources",
     "torrents": "Torrents",
     "visualize": "Visualize"
+  },
+  "sources": {
+    "add": "Add Feed",
+    "add_feed": "Add RSS Feed",
+    "added": "Added",
+    "delete": "Delete feed",
+    "feeds": "RSS Feeds",
+    "no_feeds": "No RSS feeds configured. Add one above.",
+    "source_invalid": "Lowercase letters, numbers, underscores and hyphens only",
+    "source_name": "Source name",
+    "source_required": "Source name is required",
+    "url": "Feed URL",
+    "url_invalid": "Must be a valid http/https URL",
+    "url_required": "URL is required"
   },
   "torrents": {
     "classification": "Classification",

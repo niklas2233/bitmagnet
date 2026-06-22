@@ -83,6 +83,13 @@ export const routes: Routes = [
             (c) => c.TorrentsDashboardComponent,
           ),
       },
+      {
+        path: "sources",
+        loadComponent: () =>
+          import("./dashboard/sources/rss-sources.component").then(
+            (c) => c.RssSourcesComponent,
+          ),
+      },
     ],
   },
   {
