@@ -29,6 +29,7 @@ type Result struct {
 
 func New(p Params) Result {
 	stop := make(chan struct{})
+
 	return Result{
 		Worker: worker.NewWorker("metafetcher", fx.Hook{
 			OnStart: func(_ context.Context) error {

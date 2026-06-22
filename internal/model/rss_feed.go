@@ -25,5 +25,6 @@ func (f *RssFeed) BeforeCreate(_ *gorm.DB) error {
 	if f.ID == "" {
 		f.ID = uuid.New().String()
 	}
+
 	return nil
 }

@@ -94,7 +94,7 @@ func (f *fetcher) processBatch(ctx context.Context) {
 
 		wg.Add(1)
 
-		go func(hash protocol.ID) { //nolint:contextcheck
+		go func(hash protocol.ID) {
 			defer sem.Release(1)
 			defer wg.Done()
 
@@ -140,9 +140,11 @@ func (f *fetcher) iterativeGetPeers(
 
 	for _, n := range f.kTable.GetClosestNodes(hash) {
 		addr := n.Addr()
+
 		key := addr.String()
 		if !seen[key] {
 			seen[key] = true
+
 			frontier = append(frontier, nodeCandidate{addr: addr, id: n.ID()})
 		}
 	}
@@ -192,7 +194,11 @@ func (f *fetcher) iterativeGetPeers(
 
 					if !seen[key] {
 						seen[key] = true
-						newCandidates = append(newCandidates, nodeCandidate{addr: n.Addr, id: n.ID})
+
+						newCandidates = append(
+							newCandidates,
+							nodeCandidate{addr: n.Addr, id: n.ID},
+						)
 					}
 				}
 			}(c.addr)
@@ -225,10 +231,12 @@ func xorLess(a, b, target protocol.ID) bool {
 	for i := range a {
 		ai := a[i] ^ target[i]
 		bi := b[i] ^ target[i]
+
 		if ai != bi {
 			return ai < bi
 		}
 	}
+
 	return false
 }
 
@@ -335,6 +343,7 @@ func (f *fetcher) persist(ctx context.Context, hash protocol.ID, info metainfo.I
 			for i := range files {
 				filePtrs[i] = &files[i]
 			}
+
 			if err := tx.WithContext(ctx).TorrentFile.Clauses(clause.OnConflict{
 				DoNothing: true,
 			}).CreateInBatches(filePtrs, 100); err != nil {

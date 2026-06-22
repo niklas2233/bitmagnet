@@ -94,6 +94,7 @@ func extractLeechers(item rssItem) model.NullUint {
 	if p := item.torznabAttr("peers"); p != "" {
 		if peers, err := strconv.ParseUint(p, 10, 64); err == nil {
 			seeders := uint64(0)
+
 			if s := item.torznabAttr("seeders"); s != "" {
 				if sv, err2 := strconv.ParseUint(s, 10, 64); err2 == nil {
 					seeders = sv
@@ -118,6 +119,7 @@ func hashFromMagnet(s string) (string, bool) {
 	if err != nil {
 		return "", false
 	}
+
 	for _, xt := range u.Query()["xt"] {
 		if strings.HasPrefix(xt, "urn:btih:") {
 			return strings.TrimPrefix(xt, "urn:btih:"), true

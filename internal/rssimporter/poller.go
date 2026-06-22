@@ -30,8 +30,10 @@ type poller struct {
 
 func (p *poller) start() {
 	p.poll()
+
 	ticker := time.NewTicker(p.config.PollInterval)
 	defer ticker.Stop()
+
 	for {
 		select {
 		case <-ticker.C:
@@ -107,6 +109,7 @@ func (p *poller) pollFeed(feed FeedConfig) {
 			if downloadURL == "" {
 				downloadURL = item.Link
 			}
+
 			if downloadURL == "" {
 				p.logger.Debugw("no download url", "title", item.Title)
 				continue
