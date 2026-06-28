@@ -8,13 +8,15 @@ type FeedConfig struct {
 }
 
 type Config struct {
-	Feeds        []FeedConfig
-	PollInterval time.Duration
+	Feeds         []FeedConfig
+	PollInterval  time.Duration
+	DownloadDelay time.Duration
 }
 
 func NewDefaultConfig() Config {
 	return Config{
-		Feeds:        []FeedConfig{},
-		PollInterval: 30 * time.Minute,
+		Feeds:         []FeedConfig{},
+		PollInterval:  30 * time.Minute,
+		DownloadDelay: 2 * time.Second,
 	}
 }

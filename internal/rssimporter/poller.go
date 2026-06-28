@@ -115,6 +115,10 @@ func (p *poller) pollFeed(feed FeedConfig) {
 				continue
 			}
 
+			if p.config.DownloadDelay > 0 {
+				time.Sleep(p.config.DownloadDelay)
+			}
+
 			hashStr, ok = p.infoHashFromDownload(downloadURL)
 			if !ok {
 				p.logger.Warnw("could not extract infohash", "title", item.Title)
@@ -201,6 +205,11 @@ func (p *poller) infoHashFromDownload(downloadURL string) (string, bool) {
 
 		p.logger.Warnw("redirect to non-magnet location", "location", location)
 
+		return "", false
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		p.logger.Warnw("torrent download failed", "status", resp.StatusCode, "url", downloadURL)
 		return "", false
 	}
 
