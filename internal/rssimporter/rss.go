@@ -2,6 +2,7 @@ package rssimporter
 
 import (
 	"encoding/xml"
+	"fmt"
 	"net/url"
 	"strconv"
 	"strings"
@@ -46,7 +47,21 @@ func (item rssItem) torznabAttr(name string) string {
 	return ""
 }
 
+// torznabErrorResp matches Prowlarr/Torznab error responses like:
+// <?xml version="1.0"?><error code="429" description="Indexer is disabled..."/>
+type torznabErrorResp struct {
+	XMLName     xml.Name `xml:"error"`
+	Code        string   `xml:"code,attr"`
+	Description string   `xml:"description,attr"`
+}
+
 func parseRSSFeed(data []byte) ([]rssItem, error) {
+	// Detect Prowlarr/Torznab error envelope before attempting RSS parse.
+	var errResp torznabErrorResp
+	if xml.Unmarshal(data, &errResp) == nil && errResp.Code != "" {
+		return nil, fmt.Errorf("feed error (code %s): %s", errResp.Code, errResp.Description)
+	}
+
 	var feed rssFeed
 	if err := xml.Unmarshal(data, &feed); err != nil {
 		return nil, err
