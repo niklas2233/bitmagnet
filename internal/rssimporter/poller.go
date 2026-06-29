@@ -116,7 +116,8 @@ func (p *poller) pollFeed(feed FeedConfig) {
 				continue
 			}
 
-			if p.config.DownloadDelay > 0 {
+			// Only sleep when a real network request is needed (not for cache hits).
+			if p.config.DownloadDelay > 0 && !p.isCached(downloadURL) {
 				time.Sleep(p.config.DownloadDelay)
 			}
 
@@ -190,12 +191,17 @@ var noRedirectClient = &http.Client{
 	},
 }
 
+func (p *poller) isCached(downloadURL string) bool {
+	_, ok := p.torrentCache.Load(downloadURL)
+	return ok
+}
+
 func (p *poller) infoHashFromDownload(downloadURL string) (hashStr string, ok bool, rateLimited bool) {
 	if cached, hit := p.torrentCache.Load(downloadURL); hit {
 		return cached.(string), true, false
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, downloadURL, nil)
