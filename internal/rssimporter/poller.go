@@ -101,7 +101,7 @@ func (p *poller) pollFeed(feed FeedConfig) {
 	p.logger.Debugw("fetched rss items", "source", source, "count", len(items))
 
 	count := 0
-	consecutiveRateLimit := 0
+	consecutiveErrors := 0
 
 	for _, item := range items {
 		hashStr, ok := extractInfoHash(item)
@@ -122,18 +122,23 @@ func (p *poller) pollFeed(feed FeedConfig) {
 				time.Sleep(p.config.DownloadDelay)
 			}
 
-			var rateLimited bool
+			var rateLimited, serverError bool
 
-			hashStr, ok, rateLimited = p.infoHashFromDownload(downloadURL)
-			if rateLimited {
-				consecutiveRateLimit++
-				if consecutiveRateLimit >= 3 {
-					p.logger.Warnw("aborting poll: indexer rate limiting, will retry next cycle",
-						"source", source)
+			hashStr, ok, rateLimited, serverError = p.infoHashFromDownload(downloadURL)
+			if rateLimited || serverError {
+				consecutiveErrors++
+				if consecutiveErrors >= 3 {
+					reason := "rate limiting"
+					if serverError && !rateLimited {
+						reason = "server errors (5xx)"
+					}
+
+					p.logger.Warnw("aborting poll: indexer unavailable, will retry next cycle",
+						"source", source, "reason", reason)
 					break
 				}
 			} else {
-				consecutiveRateLimit = 0
+				consecutiveErrors = 0
 			}
 
 			if !ok {
@@ -141,7 +146,7 @@ func (p *poller) pollFeed(feed FeedConfig) {
 				continue
 			}
 		} else {
-			consecutiveRateLimit = 0
+			consecutiveErrors = 0
 		}
 
 		infoHash, err := protocol.ParseID(hashStr)
@@ -229,9 +234,9 @@ func encodeLinkParam(rawURL string) string {
 	return rawURL[:idx+1] + query[:valueStart] + fixed + query[valueEnd:]
 }
 
-func (p *poller) infoHashFromDownload(downloadURL string) (hashStr string, ok bool, rateLimited bool) {
+func (p *poller) infoHashFromDownload(downloadURL string) (hashStr string, ok bool, rateLimited bool, serverError bool) {
 	if cached, hit := p.torrentCache.Load(downloadURL); hit {
-		return cached.(string), true, false
+		return cached.(string), true, false, false
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
@@ -240,13 +245,13 @@ func (p *poller) infoHashFromDownload(downloadURL string) (hashStr string, ok bo
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, encodeLinkParam(downloadURL), nil)
 	if err != nil {
 		p.logger.Warnw("torrent request build failed", "error", err)
-		return "", false, false
+		return "", false, false, false
 	}
 
 	resp, err := noRedirectClient.Do(req)
 	if err != nil {
 		p.logger.Warnw("torrent download failed", "error", err)
-		return "", false, false
+		return "", false, false, false
 	}
 	defer resp.Body.Close()
 
@@ -255,40 +260,45 @@ func (p *poller) infoHashFromDownload(downloadURL string) (hashStr string, ok bo
 		location := resp.Header.Get("Location")
 		if hash, ok := hashFromMagnet(location); ok {
 			p.torrentCache.Store(downloadURL, hash)
-			return hash, true, false
+			return hash, true, false, false
 		}
 
 		p.logger.Warnw("redirect to non-magnet location", "location", location)
 
-		return "", false, false
+		return "", false, false, false
 	}
 
 	if resp.StatusCode == http.StatusTooManyRequests {
 		p.logger.Warnw("torrent download rate limited (429)", "url", downloadURL)
-		return "", false, true
+		return "", false, true, false
+	}
+
+	if resp.StatusCode >= 500 {
+		p.logger.Warnw("torrent download server error", "status", resp.StatusCode, "url", downloadURL)
+		return "", false, false, true
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		p.logger.Warnw("torrent download failed", "status", resp.StatusCode, "url", downloadURL)
-		return "", false, false
+		return "", false, false, false
 	}
 
 	// Direct torrent file response
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		p.logger.Warnw("torrent read failed", "error", err)
-		return "", false, false
+		return "", false, false, false
 	}
 
 	mi, err := metainfo.Load(bytes.NewReader(body))
 	if err != nil {
 		p.logger.Warnw("torrent parse failed", "error", err, "preview", string(body[:min(120, len(body))]))
-		return "", false, false
+		return "", false, false, false
 	}
 
 	h := mi.HashInfoBytes()
 	hs := hex.EncodeToString(h[:])
 	p.torrentCache.Store(downloadURL, hs)
 
-	return hs, true, false
+	return hs, true, false, false
 }
