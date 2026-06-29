@@ -135,6 +135,7 @@ func (p *poller) pollFeed(feed FeedConfig) {
 
 					p.logger.Warnw("aborting poll: indexer unavailable, will retry next cycle",
 						"source", source, "reason", reason)
+
 					break
 				}
 			} else {
@@ -234,7 +235,9 @@ func encodeLinkParam(rawURL string) string {
 	return rawURL[:idx+1] + query[:valueStart] + fixed + query[valueEnd:]
 }
 
-func (p *poller) infoHashFromDownload(downloadURL string) (hashStr string, ok bool, rateLimited bool, serverError bool) {
+func (p *poller) infoHashFromDownload(downloadURL string) (
+	hashStr string, ok bool, rateLimited bool, serverError bool,
+) {
 	if cached, hit := p.torrentCache.Load(downloadURL); hit {
 		return cached.(string), true, false, false
 	}
