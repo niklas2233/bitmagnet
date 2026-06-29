@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -196,6 +197,38 @@ func (p *poller) isCached(downloadURL string) bool {
 	return ok
 }
 
+// encodeLinkParam replaces bare '+' with '%2B' in the 'link' query parameter
+// so that servers using standard form-decoding (e.g. Prowlarr/.NET) receive
+// the correct base64 value instead of interpreting '+' as a space.
+func encodeLinkParam(rawURL string) string {
+	const prefix = "link="
+
+	idx := strings.Index(rawURL, "?")
+	if idx < 0 {
+		return rawURL
+	}
+
+	query := rawURL[idx+1:]
+	linkIdx := strings.Index(query, prefix)
+
+	if linkIdx < 0 {
+		return rawURL
+	}
+
+	valueStart := linkIdx + len(prefix)
+	valueEnd := strings.Index(query[valueStart:], "&")
+
+	if valueEnd < 0 {
+		valueEnd = len(query)
+	} else {
+		valueEnd += valueStart
+	}
+
+	fixed := strings.ReplaceAll(query[valueStart:valueEnd], "+", "%2B")
+
+	return rawURL[:idx+1] + query[:valueStart] + fixed + query[valueEnd:]
+}
+
 func (p *poller) infoHashFromDownload(downloadURL string) (hashStr string, ok bool, rateLimited bool) {
 	if cached, hit := p.torrentCache.Load(downloadURL); hit {
 		return cached.(string), true, false
@@ -204,7 +237,7 @@ func (p *poller) infoHashFromDownload(downloadURL string) (hashStr string, ok bo
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, downloadURL, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, encodeLinkParam(downloadURL), nil)
 	if err != nil {
 		p.logger.Warnw("torrent request build failed", "error", err)
 		return "", false, false
