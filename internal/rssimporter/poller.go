@@ -126,7 +126,8 @@ func (p *poller) pollFeed(feed FeedConfig) {
 			if rateLimited {
 				consecutiveRateLimit++
 				if consecutiveRateLimit >= 3 {
-					p.logger.Warnw("aborting poll: indexer is rate limiting downloads, will retry next cycle", "source", source)
+					p.logger.Warnw("aborting poll: indexer rate limiting, will retry next cycle",
+						"source", source)
 					break
 				}
 			} else {
