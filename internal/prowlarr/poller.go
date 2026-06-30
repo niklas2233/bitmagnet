@@ -92,7 +92,7 @@ func (p *poller) poll() {
 }
 
 func (p *poller) pollIndexer(idx Indexer, baseURL, apiKey string, ai importer.ActiveImport) {
-	feedURL := fmt.Sprintf("%s/%s/api?apikey=%s&t=rss", baseURL, idx.DefinitionName, apiKey)
+	feedURL := fmt.Sprintf("%s/%d/api?apikey=%s&t=rss", baseURL, idx.ID, apiKey)
 
 	resp, err := http.Get(feedURL) //nolint:noctx
 	if err != nil {
