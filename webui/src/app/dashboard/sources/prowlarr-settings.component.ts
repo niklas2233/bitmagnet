@@ -7,6 +7,7 @@ import {
 } from "@angular/core";
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
+import { MatSlideToggleModule } from "@angular/material/slide-toggle";
 import { AppModule } from "../../app.module";
 import { DocumentTitleComponent } from "../../layout/document-title.component";
 import { apiBase } from "../../../environments/environment";
@@ -21,7 +22,7 @@ interface ProwlarrConfig {
 @Component({
   selector: "app-prowlarr-settings",
   standalone: true,
-  imports: [AppModule, DocumentTitleComponent],
+  imports: [AppModule, DocumentTitleComponent, MatSlideToggleModule],
   templateUrl: "./prowlarr-settings.component.html",
   styleUrl: "./prowlarr-settings.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
