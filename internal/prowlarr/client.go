@@ -14,6 +14,7 @@ type Indexer struct {
 	DefinitionName string `json:"definitionName"`
 	Enable         bool   `json:"enable"`
 	SupportsRss    bool   `json:"supportsRss"`
+	Protocol       string `json:"protocol"` // "torrent" or "usenet"
 }
 
 func listIndexers(ctx context.Context, baseURL, apiKey string) ([]Indexer, error) {

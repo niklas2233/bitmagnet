@@ -77,7 +77,7 @@ func (p *poller) poll() {
 	ai := p.importer.New(ctx, importer.Info{ID: importID, Priority: 20})
 
 	for _, idx := range indexers {
-		if !idx.Enable || !idx.SupportsRss {
+		if !idx.Enable || !idx.SupportsRss || idx.Protocol != "torrent" {
 			continue
 		}
 
@@ -92,7 +92,7 @@ func (p *poller) poll() {
 }
 
 func (p *poller) pollIndexer(idx Indexer, baseURL, apiKey string, ai importer.ActiveImport) {
-	feedURL := fmt.Sprintf("%s/%d/api?apikey=%s&t=rss", baseURL, idx.ID, apiKey)
+	feedURL := fmt.Sprintf("%s/%d/api?apikey=%s&t=search&limit=100", baseURL, idx.ID, apiKey)
 
 	resp, err := http.Get(feedURL) //nolint:noctx
 	if err != nil {
