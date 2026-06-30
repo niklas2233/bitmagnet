@@ -1,0 +1,71 @@
+<ng-container *transloco="let t">
+  <app-document-title [parts]="[t('routes.prowlarr'), t('routes.dashboard')]" />
+
+  <mat-card class="dashboard-card">
+    <mat-card-header>
+      <mat-toolbar>
+        <h2><mat-icon>settings_input_antenna</mat-icon>{{ t("routes.prowlarr") }}</h2>
+      </mat-toolbar>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="prowlarr-body">
+        @if (error()) {
+          <div class="error-banner">{{ error() }}</div>
+        }
+        @if (success()) {
+          <div class="success-banner">{{ t("prowlarr.saved") }}</div>
+        }
+
+        @if (loading()) {
+          <mat-progress-bar mode="indeterminate" />
+        } @else {
+          <form [formGroup]="form" (ngSubmit)="save()" class="settings-form">
+            <div class="toggle-row">
+              <mat-slide-toggle formControlName="enabled" color="primary">
+                {{ t("prowlarr.enabled") }}
+              </mat-slide-toggle>
+              <span class="toggle-hint">{{ t("prowlarr.enabled_hint") }}</span>
+            </div>
+
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>{{ t("prowlarr.base_url") }}</mat-label>
+              <input matInput formControlName="baseUrl" placeholder="http://prowlarr:9696" />
+              @if (form.get("baseUrl")?.hasError("pattern")) {
+                <mat-error>{{ t("prowlarr.base_url_invalid") }}</mat-error>
+              }
+              <mat-hint>{{ t("prowlarr.base_url_hint") }}</mat-hint>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>{{ t("prowlarr.api_key") }}</mat-label>
+              <input matInput formControlName="apiKey" type="password" autocomplete="off" />
+              <mat-hint>{{ t("prowlarr.api_key_hint") }}</mat-hint>
+            </mat-form-field>
+
+            @if (config()?.updatedAt) {
+              <p class="last-saved">
+                {{ t("prowlarr.last_saved") }}:
+                {{ config()!.updatedAt | date: "short" }}
+              </p>
+            }
+
+            <div class="form-actions">
+              <button
+                mat-raised-button
+                color="primary"
+                type="submit"
+                [disabled]="form.invalid || saving()"
+              >
+                @if (saving()) {
+                  <mat-progress-spinner diameter="20" mode="indeterminate" />
+                } @else {
+                  {{ t("prowlarr.save") }}
+                }
+              </button>
+            </div>
+          </form>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+</ng-container>

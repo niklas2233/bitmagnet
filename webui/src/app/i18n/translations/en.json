@@ -227,11 +227,24 @@
     "x_to_y": "{{x}} to {{y}}",
     "x_to_y_of_z": "{{x}} to {{y}} of {{z}}"
   },
+  "prowlarr": {
+    "api_key": "API Key",
+    "api_key_hint": "Found in Prowlarr → Settings → General → Security",
+    "base_url": "Prowlarr Base URL",
+    "base_url_hint": "e.g. http://prowlarr:9696",
+    "base_url_invalid": "Must be a valid http/https URL",
+    "enabled": "Enable Prowlarr integration",
+    "enabled_hint": "Polls all RSS-capable indexers every 30 minutes",
+    "last_saved": "Last saved",
+    "save": "Save",
+    "saved": "Settings saved successfully"
+  },
   "routes": {
     "admin": "Admin",
     "dashboard": "Dashboard",
     "home": "Home",
     "jobs": "Jobs",
+    "prowlarr": "Prowlarr",
     "queues": "Queues",
     "sources": "Sources",
     "torrents": "Torrents",

@@ -84,7 +84,7 @@ func (p *poller) pollFeed(feed FeedConfig) {
 		return
 	}
 
-	items, err := parseRSSFeed(data)
+	items, err := ParseFeed(data)
 	if err != nil {
 		p.logger.Warnw("rss parse failed", "url", feed.URL, "error", err)
 		return
@@ -104,7 +104,7 @@ func (p *poller) pollFeed(feed FeedConfig) {
 	consecutiveErrors := 0
 
 	for _, item := range items {
-		hashStr, ok := extractInfoHash(item)
+		hashStr, ok := ExtractInfoHash(item)
 		if !ok {
 			// Fall back to downloading the torrent file and extracting the infohash
 			downloadURL := item.Enclosure.URL
@@ -156,11 +156,11 @@ func (p *poller) pollFeed(feed FeedConfig) {
 			continue
 		}
 
-		size := extractSize(item)
-		seeders := extractSeeders(item)
-		leechers := extractLeechers(item)
+		size := ExtractSize(item)
+		seeders := ExtractSeeders(item)
+		leechers := ExtractLeechers(item)
 
-		publishedAt := parsePubDate(item.PubDate)
+		publishedAt := ParsePubDate(item.PubDate)
 		if publishedAt.IsZero() {
 			publishedAt = time.Now()
 		}
@@ -261,7 +261,7 @@ func (p *poller) infoHashFromDownload(downloadURL string) (
 	// Handle redirect — Prowlarr redirects download URLs to magnet links
 	if resp.StatusCode >= 300 && resp.StatusCode < 400 {
 		location := resp.Header.Get("Location")
-		if hash, ok := hashFromMagnet(location); ok {
+		if hash, ok := HashFromMagnet(location); ok {
 			p.torrentCache.Store(downloadURL, hash)
 			return hash, true, false, false
 		}

@@ -50,6 +50,16 @@
               ><mat-icon>rss_feed</mat-icon>{{ t("routes.sources") }}</a
             >
           </li>
+          <li>
+            <a
+              mat-button
+              routerLink="prowlarr"
+              routerLinkActive
+              #linkProwlarr="routerLinkActive"
+              [class]="linkProwlarr.isActive ? 'active' : ''"
+              ><mat-icon>settings_input_antenna</mat-icon>{{ t("routes.prowlarr") }}</a
+            >
+          </li>
         </ul>
       </nav>
     </mat-drawer>

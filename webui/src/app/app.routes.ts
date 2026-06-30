@@ -90,6 +90,13 @@ export const routes: Routes = [
             (c) => c.RssSourcesComponent,
           ),
       },
+      {
+        path: "prowlarr",
+        loadComponent: () =>
+          import(
+            "./dashboard/sources/prowlarr-settings.component"
+          ).then((c) => c.ProwlarrSettingsComponent),
+      },
     ],
   },
   {
