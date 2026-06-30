@@ -33,8 +33,11 @@ export class ProwlarrSettingsComponent implements OnInit {
   config = signal<ProwlarrConfig | null>(null);
   loading = signal(false);
   saving = signal(false);
+  testing = signal(false);
   error = signal<string | null>(null);
   success = signal(false);
+  testResult = signal<string | null>(null);
+  testError = signal<string | null>(null);
 
   /* eslint-disable @typescript-eslint/unbound-method */
   form = new FormGroup({
@@ -66,6 +69,30 @@ export class ProwlarrSettingsComponent implements OnInit {
         this.loading.set(false);
       },
     });
+  }
+
+  test() {
+    const { baseUrl, apiKey } = this.form.value;
+    this.testing.set(true);
+    this.testResult.set(null);
+    this.testError.set(null);
+    this.http
+      .post<{ indexerCount: number }>(`${apiBase}/api/prowlarr/test`, {
+        enabled: true,
+        baseUrl: baseUrl ?? "",
+        apiKey: apiKey ?? "",
+      })
+      .subscribe({
+        next: (res) => {
+          this.testResult.set(`Connected — ${res.indexerCount} indexer(s) found`);
+          this.testing.set(false);
+        },
+        error: (err: HttpErrorResponse) => {
+          const body = err.error as { error?: string } | null;
+          this.testError.set(body?.error ?? err.message ?? "Connection failed");
+          this.testing.set(false);
+        },
+      });
   }
 
   save() {

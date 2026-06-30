@@ -15,6 +15,12 @@
         @if (success()) {
           <div class="success-banner">{{ t("prowlarr.saved") }}</div>
         }
+        @if (testError()) {
+          <div class="error-banner">{{ testError() }}</div>
+        }
+        @if (testResult()) {
+          <div class="success-banner">{{ testResult() }}</div>
+        }
 
         @if (loading()) {
           <mat-progress-bar mode="indeterminate" />
@@ -50,6 +56,18 @@
             }
 
             <div class="form-actions">
+              <button
+                mat-stroked-button
+                type="button"
+                [disabled]="!form.value.baseUrl || testing() || saving()"
+                (click)="test()"
+              >
+                @if (testing()) {
+                  <mat-progress-spinner diameter="20" mode="indeterminate" />
+                } @else {
+                  {{ t("prowlarr.test") }}
+                }
+              </button>
               <button
                 mat-raised-button
                 color="primary"

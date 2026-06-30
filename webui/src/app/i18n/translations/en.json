@@ -237,7 +237,8 @@
     "enabled_hint": "Polls all RSS-capable indexers every 30 minutes",
     "last_saved": "Last saved",
     "save": "Save",
-    "saved": "Settings saved successfully"
+    "saved": "Settings saved successfully",
+    "test": "Test Connection"
   },
   "routes": {
     "admin": "Admin",
