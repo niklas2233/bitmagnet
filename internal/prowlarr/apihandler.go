@@ -80,6 +80,14 @@ func makePutHandler(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
+		ctx := c.Request.Context()
+		if req.Enabled {
+			src := model.TorrentSource{Key: sourceKey, Name: "Prowlarr"}
+			db.WithContext(ctx).Where(model.TorrentSource{Key: sourceKey}).FirstOrCreate(&src)
+		} else {
+			db.WithContext(ctx).Where("key = ?", sourceKey).Delete(&model.TorrentSource{})
+		}
+
 		c.JSON(http.StatusOK, configResponse{
 			Enabled:   cfg.Enabled,
 			BaseURL:   cfg.BaseURL,
