@@ -108,12 +108,13 @@ func makePutHandler(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		ctx := c.Request.Context()
+		// Only create the source row on enable; never delete it on disable.
+		// torrents_torrent_sources.source has ON DELETE CASCADE to torrent_sources,
+		// so deleting the row here would wipe every torrent's import history for it.
 		if req.Enabled {
+			ctx := c.Request.Context()
 			src := model.TorrentSource{Key: sourceKey, Name: "Prowlarr"}
 			db.WithContext(ctx).Where(model.TorrentSource{Key: sourceKey}).FirstOrCreate(&src)
-		} else {
-			db.WithContext(ctx).Where("key = ?", sourceKey).Delete(&model.TorrentSource{})
 		}
 
 		c.JSON(http.StatusOK, configResponse{
