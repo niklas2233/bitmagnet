@@ -80,7 +80,7 @@ func (p *poller) poll() {
 	ai := p.importer.New(ctx, importer.Info{ID: importID, Priority: 20})
 
 	for _, idx := range indexers {
-		if !idx.Enable || !idx.SupportsRss || idx.Protocol != "torrent" {
+		if !idx.Enable || !idx.SupportsRss || idx.Protocol != "torrent" || idx.DefinitionName == "bitmagnet" {
 			continue
 		}
 
