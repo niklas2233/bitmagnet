@@ -31,32 +31,28 @@ func torrentContentResultToTorznabResult(
 
 func torrentContentResultItemToTorznabResultItem(item search.TorrentContentResultItem) torznab.SearchResultItem {
 	category := "Unknown"
-	if item.ContentType.Valid {
-		category = item.ContentType.ContentType.Label()
-	}
-
 	categoryID := torznab.CategoryOther.ID
 
 	if item.ContentType.Valid {
 		switch item.ContentType.ContentType {
 		case model.ContentTypeMovie:
-			categoryID = torznab.CategoryMovies.ID
+			categoryID, category = movieCategory(item.VideoResolution)
 		case model.ContentTypeTvShow:
-			categoryID = torznab.CategoryTV.ID
+			categoryID, category = tvCategory(item.VideoResolution)
 		case model.ContentTypeMusic:
-			categoryID = torznab.CategoryAudio.ID
+			categoryID, category = torznab.CategoryAudio.ID, "music"
 		case model.ContentTypeEbook:
-			categoryID = torznab.CategoryBooks.ID
+			categoryID, category = torznab.CategoryBooksEBook.ID, "ebook"
 		case model.ContentTypeComic:
-			categoryID = torznab.CategoryBooksComics.ID
+			categoryID, category = torznab.CategoryBooksComics.ID, "comic"
 		case model.ContentTypeAudiobook:
-			categoryID = torznab.CategoryAudioAudiobook.ID
+			categoryID, category = torznab.CategoryAudioAudiobook.ID, "audiobook"
 		case model.ContentTypeSoftware:
-			categoryID = torznab.CategoryPC.ID
+			categoryID, category = torznab.CategoryPC.ID, "software"
 		case model.ContentTypeGame:
-			categoryID = torznab.CategoryPCGames.ID
+			categoryID, category = torznab.CategoryPCGames.ID, "game"
 		case model.ContentTypeXxx:
-			categoryID = torznab.CategoryXXX.ID
+			categoryID, category = torznab.CategoryXXX.ID, "xxx"
 		}
 	}
 
@@ -185,3 +181,32 @@ func torrentContentResultItemToTorznabResultItem(item search.TorrentContentResul
 		TorznabAttrs: attrs,
 	}
 }
+
+func tvCategory(res model.NullVideoResolution) (int, string) {
+	if res.Valid {
+		switch res.VideoResolution {
+		case model.VideoResolutionV2160p, model.VideoResolutionV4320p:
+			return torznab.CategoryTVUHD.ID, "tv_show_uhd"
+		case model.VideoResolutionV720p, model.VideoResolutionV1080p, model.VideoResolutionV1440p:
+			return torznab.CategoryTVHD.ID, "tv_show_hd"
+		case model.VideoResolutionV360p, model.VideoResolutionV480p, model.VideoResolutionV540p, model.VideoResolutionV576p:
+			return torznab.CategoryTVSD.ID, "tv_show_sd"
+		}
+	}
+	return torznab.CategoryTV.ID, "tv_show"
+}
+
+func movieCategory(res model.NullVideoResolution) (int, string) {
+	if res.Valid {
+		switch res.VideoResolution {
+		case model.VideoResolutionV2160p, model.VideoResolutionV4320p:
+			return torznab.CategoryMoviesUHD.ID, "movie_uhd"
+		case model.VideoResolutionV720p, model.VideoResolutionV1080p, model.VideoResolutionV1440p:
+			return torznab.CategoryMoviesHD.ID, "movie_hd"
+		case model.VideoResolutionV360p, model.VideoResolutionV480p, model.VideoResolutionV540p, model.VideoResolutionV576p:
+			return torznab.CategoryMoviesSD.ID, "movie_sd"
+		}
+	}
+	return torznab.CategoryMovies.ID, "movie"
+}
+
