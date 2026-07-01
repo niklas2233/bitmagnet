@@ -47,9 +47,19 @@ func (p *poller) start() {
 
 func (p *poller) poll() {
 	feeds := p.allFeeds()
+
+	var wg sync.WaitGroup
+
 	for _, feed := range feeds {
-		p.pollFeed(feed)
+		wg.Add(1)
+
+		go func(feed FeedConfig) {
+			defer wg.Done()
+			p.pollFeed(feed)
+		}(feed)
 	}
+
+	wg.Wait()
 }
 
 func (p *poller) allFeeds() []FeedConfig {
@@ -254,7 +264,9 @@ func (p *poller) infoHashFromDownload(downloadURL string) (
 	resp, err := noRedirectClient.Do(req)
 	if err != nil {
 		p.logger.Warnw("torrent download failed", "error", err)
-		return "", false, false, false
+		// Connection/TLS-level failures (timeouts, refused, DNS) are treated like
+		// server errors so a systemically blocked feed still trips the abort threshold.
+		return "", false, false, true
 	}
 	defer resp.Body.Close()
 
