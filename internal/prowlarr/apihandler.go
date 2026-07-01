@@ -1,6 +1,7 @@
 package prowlarr
 
 import (
+	"errors"
 	"net/http"
 	"time"
 
@@ -11,7 +12,8 @@ import (
 )
 
 type apiHandler struct {
-	lazyDB lazy.Lazy[*gorm.DB]
+	lazyDB  lazy.Lazy[*gorm.DB]
+	trigger chan struct{}
 }
 
 func (apiHandler) Key() string { return "prowlarr_api" }
@@ -24,7 +26,7 @@ func (h apiHandler) Apply(e *gin.Engine) error {
 
 	g := e.Group("/api/prowlarr")
 	g.GET("", makeGetHandler(db))
-	g.PUT("", makePutHandler(db))
+	g.PUT("", makePutHandler(db, h.trigger))
 	g.POST("/test", makeTestHandler())
 
 	return nil
@@ -67,6 +69,10 @@ func makeGetHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var cfg model.ProwlarrConfig
 		if err := db.WithContext(c.Request.Context()).First(&cfg).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				c.JSON(http.StatusOK, configResponse{})
+				return
+			}
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
@@ -80,7 +86,7 @@ func makeGetHandler(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
-func makePutHandler(db *gorm.DB) gin.HandlerFunc {
+func makePutHandler(db *gorm.DB, trigger chan struct{}) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req configRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
@@ -115,6 +121,11 @@ func makePutHandler(db *gorm.DB) gin.HandlerFunc {
 			ctx := c.Request.Context()
 			src := model.TorrentSource{Key: sourceKey, Name: "Prowlarr"}
 			db.WithContext(ctx).Where(model.TorrentSource{Key: sourceKey}).FirstOrCreate(&src)
+
+			select {
+			case trigger <- struct{}{}:
+			default:
+			}
 		}
 
 		c.JSON(http.StatusOK, configResponse{

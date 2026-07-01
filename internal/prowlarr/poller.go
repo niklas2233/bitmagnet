@@ -24,6 +24,7 @@ type poller struct {
 	db       *gorm.DB
 	logger   *zap.SugaredLogger
 	stop     chan struct{}
+	trigger  chan struct{}
 }
 
 func (p *poller) start() {
@@ -35,6 +36,8 @@ func (p *poller) start() {
 	for {
 		select {
 		case <-ticker.C:
+			p.poll()
+		case <-p.trigger:
 			p.poll()
 		case <-p.stop:
 			return

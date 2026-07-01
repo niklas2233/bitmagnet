@@ -27,6 +27,7 @@ type Result struct {
 
 func New(p Params) Result {
 	var pol *poller
+	trigger := make(chan struct{}, 1)
 
 	return Result{
 		Worker: worker.NewWorker("prowlarr", fx.Hook{
@@ -46,6 +47,7 @@ func New(p Params) Result {
 					db:       db,
 					logger:   p.Logger.Named("prowlarr"),
 					stop:     make(chan struct{}),
+					trigger:  trigger,
 				}
 
 				go pol.start() //nolint:contextcheck
@@ -60,6 +62,6 @@ func New(p Params) Result {
 				return nil
 			},
 		}),
-		Option: apiHandler{lazyDB: p.DB},
+		Option: apiHandler{lazyDB: p.DB, trigger: trigger},
 	}
 }
